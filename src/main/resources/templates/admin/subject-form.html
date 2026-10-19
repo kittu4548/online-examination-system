@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create Subject</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5" style="max-width: 760px">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h2 class="mb-2"
+                th:text="${subject.id == null ? 'Create Subject' : 'Edit Subject'}">
+                Create Subject
+            </h2>
+            <p class="text-muted">
+                Choose whether the subject is free or requires a subscription.
+            </p>
+
+            <form th:action="@{/admin/subjects/save}"
+                  th:object="${subject}" method="post">
+
+                <input type="hidden" th:field="*{id}">
+
+                <div class="mb-3">
+                    <label class="form-label">Subject name *</label>
+                    <input class="form-control" th:field="*{name}"
+                           maxlength="150" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control"
+                              th:field="*{description}"
+                              rows="3" maxlength="1000"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Image URL (optional)</label>
+                    <input class="form-control" th:field="*{imageUrl}"
+                           maxlength="500"
+                           placeholder="https://example.com/subject.jpg">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Access type *</label>
+                    <select class="form-select" th:field="*{accessType}"
+                            id="accessType" required>
+                        <option value="FREE">Free</option>
+                        <option value="PAID">Paid subscription</option>
+                    </select>
+                </div>
+
+                <div id="paidFields">
+                    <div class="mb-3">
+                        <label class="form-label">Price (₹) *</label>
+                        <input class="form-control" type="number"
+                               th:field="*{price}" id="price"
+                               min="0.01" step="0.01">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Subscription duration *</label>
+                        <select class="form-select"
+                                th:field="*{subscriptionDuration}"
+                                id="duration">
+                            <option value="MONTHLY">Monthly</option>
+                            <option value="YEARLY">Yearly</option>
+                            <option value="LIFETIME">Lifetime</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mb-4">
+                    <input class="form-check-input" type="checkbox"
+                           th:field="*{published}" id="published">
+                    <label class="form-check-label" for="published">
+                        Publish subject for students
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Save Subject
+                </button>
+                <a th:href="@{/admin/subjects}"
+                   class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const accessType = document.getElementById("accessType");
+    const paidFields = document.getElementById("paidFields");
+    const price = document.getElementById("price");
+    const duration = document.getElementById("duration");
+
+    function updatePaidFields() {
+        const paid = accessType.value === "PAID";
+        paidFields.hidden = !paid;
+        price.required = paid;
+        duration.required = paid;
+    }
+
+    accessType.addEventListener("change", updatePaidFields);
+    updatePaidFields();
+</script>
+
+</body>
+</html>

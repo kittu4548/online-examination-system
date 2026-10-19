@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Email Center</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+</head>
+
+
+<body>
+
+<div class="container mt-5">
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2>
+                <i class="bi bi-envelope-fill me-2"></i>
+                Email Center
+            </h2>
+
+            <p class="text-muted mb-0">
+                Send emails to students and users.
+            </p>
+
+        </div>
+
+
+        <a th:href="@{/admin/dashboard}"
+           class="btn btn-secondary">
+
+            <i class="bi bi-arrow-left me-2"></i>
+
+            Back to Dashboard
+
+        </a>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- SUCCESS MESSAGE -->
+    <!-- ===================================================== -->
+
+    <div th:if="${success}"
+         class="alert alert-success alert-dismissible fade show">
+
+        <i class="bi bi-check-circle-fill me-2"></i>
+
+        <span th:text="${success}">
+            Email sent successfully.
+        </span>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- ERROR MESSAGE -->
+    <!-- ===================================================== -->
+
+    <div th:if="${error}"
+         class="alert alert-danger alert-dismissible fade show">
+
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+        <span th:text="${error}">
+            Failed to send email.
+        </span>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- EMAIL CARD -->
+    <!-- ===================================================== -->
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+
+                <i class="bi bi-send-fill me-2"></i>
+
+                Compose Email
+
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <!-- ================================================= -->
+            <!-- EMAIL FORM -->
+            <!-- ================================================= -->
+
+            <form th:action="@{/admin/email-center/send}"
+                  method="post">
+
+
+                <!-- ============================================= -->
+                <!-- CSRF TOKEN -->
+                <!-- ============================================= -->
+
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+
+
+                <!-- ============================================= -->
+                <!-- RECIPIENT -->
+                <!-- ============================================= -->
+
+                <div class="mb-3">
+
+                    <label for="recipient"
+                           class="form-label fw-semibold">
+
+                        Recipient Email
+
+                    </label>
+
+                    <input type="email"
+                           id="recipient"
+                           name="recipient"
+                           class="form-control"
+                           placeholder="student@example.com"
+                           required>
+
+                    <div class="form-text">
+
+                        Enter the email address that should receive the message.
+
+                    </div>
+
+                </div>
+
+
+                <!-- ============================================= -->
+                <!-- SUBJECT -->
+                <!-- ============================================= -->
+
+                <div class="mb-3">
+
+                    <label for="subject"
+                           class="form-label fw-semibold">
+
+                        Subject
+
+                    </label>
+
+                    <input type="text"
+                           id="subject"
+                           name="subject"
+                           class="form-control"
+                           placeholder="Enter email subject"
+                           required>
+
+                </div>
+
+
+                <!-- ============================================= -->
+                <!-- MESSAGE -->
+                <!-- ============================================= -->
+
+                <div class="mb-3">
+
+                    <label for="message"
+                           class="form-label fw-semibold">
+
+                        Message
+
+                    </label>
+
+                    <textarea id="message"
+                              name="message"
+                              class="form-control"
+                              rows="8"
+                              placeholder="Write your message here..."
+                              required></textarea>
+
+                </div>
+
+
+                <!-- ============================================= -->
+                <!-- BUTTONS -->
+                <!-- ============================================= -->
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-send-fill me-2"></i>
+
+                        Send Email
+
+                    </button>
+
+
+                    <button type="reset"
+                            class="btn btn-secondary">
+
+                        <i class="bi bi-x-circle me-2"></i>
+
+                        Clear
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+        .profile-pic-lg {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #dee2e6;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container my-5">
+
+  <!-- Alert Messages -->
+  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>Error:</strong> <span th:text="${errorMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <div class="row">
+
+    <!-- Left Column: Profile Picture -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body text-center">
+
+          <!-- Display Current Picture -->
+          <img th:if="${student.profilePicUrl != null}"
+               th:src="@{${student.profilePicUrl}}"
+               alt="Profile"
+               class="profile-pic-lg mb-3">
+          <svg th:if="${student.profilePicUrl == null}"
+               xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="currentColor"
+               class="bi bi-person-circle profile-pic-lg mb-3" viewBox="0 0 16 16">
+            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+          </svg>
+
+          <h4 class="mb-1" th:text="${student.fullName}">Student Name</h4>
+          <p class="text-muted" th:text="${student.username}">student@email.com</p>
+
+          <!-- Change Picture Form -->
+          <form th:action="@{/student/profile/update-picture}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="profilePicFile" class="form-label">Change Picture</label>
+              <input type="file" class="form-control" id="profilePicFile" name="profilePicFile" accept="image/png, image/jpeg" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Upload New Picture</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Details & Password -->
+    <div class="col-lg-8">
+      <!-- Update Details Form -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h4>Edit Profile Details</h4>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/student/profile/update-details}" th:object="${student}" method="post">
+            <div class="mb-3">
+              <label for="fullName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
+            </div>
+            <div class="mb-3">
+              <label for="username" class="form-label">Email (Login)</label>
+              <input type="email" class="form-control" id="username" th:field="*{username}" readonly disabled>
+              <small class="form-text text-muted">Email cannot be changed.</small>
+            </div>
+            <div class="mb-3">
+              <label for="mobileNumber" class="form-label">Mobile Number</label>
+              <input type="tel" class="form-control" id="mobileNumber" th:field="*{mobileNumber}">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Change Password Form -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h4>Change Password</h4>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/student/profile/update-password}" method="post">
+            <div class="mb-3">
+              <label for="oldPassword" class="form-label">Old Password</label>
+              <input type="password" class="form-control" id="oldPassword" name="oldPassword" required>
+            </div>
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">New Password</label>
+              <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+            </div>
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirm New Password</label>
+              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <button type="submit" class="btn btn-warning">Update Password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

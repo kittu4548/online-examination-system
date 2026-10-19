@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exam Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Import Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+        }
+    </style>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+
+    <!-- Page Header -->
+    <div class="pb-3 mb-4 border-bottom d-flex align-items-center">
+        <i class="bi bi-bar-chart-line-fill me-3" style="font-size: 2.5rem; color: #0dcaf0;"></i>
+        <div>
+            <h2 class="mb-0" th:text="${exam.title}">Exam Results</h2>
+            <p class="text-muted mb-0">Review of all student submissions and scores.</p>
+        </div>
+    </div>
+
+    <!-- Main Card for Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            <!-- Message if no results are found -->
+            <div th:if="${#lists.isEmpty(results)}" class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                No student has taken this exam yet.
+            </div>
+
+            <!-- Results Table -->
+            <div th:unless="${#lists.isEmpty(results)}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col">Student Name</th>
+                        <th scope="col">Email (Username)</th>
+                        <th scope="col">Raw Score</th>
+                        <th scope="col">Percentage</th>
+                        <th scope="col">Submission Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="result : ${results}">
+                        <!-- Student Full Name -->
+                        <td th:text="${result.student.fullName}">Sumit Kumar</td>
+
+                        <!-- Student Email -->
+                        <td th:text="${result.student.username}">student@example.com</td>
+
+                        <!-- Raw Score -->
+                        <td>
+                            <strong th:text="${result.scoreAchieved}">15</strong> /
+                            <span th:text="${result.totalMarks}">20</span>
+                        </td>
+
+                        <!-- Percentage (as a badge) -->
+                        <td>
+                            <th:block th:if="${result.totalMarks > 0}" th:with="percentage=${(result.scoreAchieved * 100.0) / result.totalMarks}">
+                                <span class="badge"
+                                      th:classappend="${percentage >= 50 ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger-emphasis'}"
+                                      th:text="${#numbers.formatDecimal(percentage, 1, 1) + '%'}">
+                                </span>
+                            </th:block>
+                            <span th:if="${result.totalMarks == 0}" class="badge bg-secondary-subtle text-secondary-emphasis">N/A</span>
+                        </td>
+
+                        <!-- Submission Time -->
+                        <td th:text="${#temporals.format(result.submissionTime, 'dd-MMM-yyyy HH:mm')}">25-Oct-2025 14:30</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <a th:href="@{/admin/manage-exams}" class="btn btn-secondary mt-4">
+        <i class="bi bi-arrow-left-circle me-2"></i>Back to Manage Exams
+    </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
