@@ -1,206 +1,696 @@
-# 🚀 Online Exam System – Java (Spring Boot)
+# Online Examination System
 
-<p align="center">
-<img src="https://img.shields.io/badge/Java-17-blue?style=for-the-badge&logo=java&logoColor=white" alt="Java 17">
-<img src="https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot 3.x">
-<img src="https://img.shields.io/badge/JPA%20%2F%20Hibernate-red?style=for-the-badge" alt="JPA / Hibernate">
-<img src="https://img.shields.io/badge/H2%20Database-lightgrey?style=for-the-badge" alt="H2 Database">
-</p>
+A full-stack **Online Examination System** built with **Spring Boot, Java, Thymeleaf, Spring Security, PostgreSQL, Razorpay and Google Gemini AI**.
 
-A comprehensive **Online Examination System** built using **Spring Boot, Spring Security, Thymeleaf, Bootstrap 5**, and **JPA/Hibernate**.  
-The platform provides a secure and user-friendly environment for **Admins** and **Students** to manage and take online tests effectively.
-
-✔️ Completely Free  
-✔️ Full Source Code Included
+The system provides separate Admin and Student workflows for managing students, subjects, exams, questions, results, paid course enrollment and AI-powered assistance.
 
 ---
 
-# 💖 Support & Contact
+## 📌 Project Overview
 
-This project is created by **LazyCoder**.
+The Online Examination System is designed to manage the complete examination workflow:
 
-### 📺 Subscribe to My YouTube Channel
-I post tutorials, Java/Python projects, and Spring Boot content regularly.
-
-👉 **Subscribe Here:**  
-https://www.youtube.com/c/LazyCoderOnline?sub_confirmation=1
-
----
-
-### 🤝 Need Help or Want a Custom Project?
-
-📌 Facing issues with this project?  
-📌 Want a custom Java/Spring Boot/Django project?
-
-**I am available for freelance development.**
-
-📱 **WhatsApp:** https://wa.me/919572181024
-
-<p align="center">
-<a href="https://www.youtube.com/c/LazyCoderOnline?sub_confirmation=1">
-<img src="https://img.shields.io/badge/Subscribe-LazyCoder-red?style=for-the-badge&logo=youtube" >
-</a>
-
-<a href="https://wa.me/919572181024">
-<img src="https://img.shields.io/badge/WhatsApp-Chat%20Now-green?style=for-the-badge&logo=whatsapp" >
-</a>
-</p>
+- Student registration and login
+- Admin authentication and administration
+- Student management
+- Subject/course management
+- Free and paid subjects
+- Razorpay payment integration
+- Course enrollment and subscription expiry
+- Exam creation and management
+- Question management
+- Online exam attempts
+- Automatic result handling
+- Email communication
+- AI chatbot for student assistance
+- Secure role-based access using Spring Security
 
 ---
 
-# 📸 Screenshots
+## 🚀 Main Features
 
+### 👨‍💼 Admin Features
 
-<table width="100%">
+The Admin dashboard provides centralized management of the examination system.
 
-
-<tr>
-<td align="center"><b>Exam Page (with Pagination)</b></td>
-</tr>
-<tr>
-<td align="center"><img src="https://github.com/sumitkumar1503/online-exam-system/blob/master/screenshots/exampage.png" width="90%"></td>
-</tr>
-
-<tr>
-<td align="center"><b>Admin Dashboard</b></td>
-</tr>
-<tr>
-<td align="center"><img src="https://github.com/sumitkumar1503/online-exam-system/blob/master/screenshots/admindashboard.png?raw=true" width="90%"></td>
-</tr>
-
-<tr>
-<td align="center"><b>Manage Exam</b></td>
-</tr>
-<tr>
-<td align="center"><img src="https://github.com/sumitkumar1503/online-exam-system/blob/master/screenshots/adminmanageexam.png" width="90%"></td>
-</tr>
-
-<tr>
-<td align="center"><b>Manage Question</b></td>
-</tr>
-<tr>
-<td align="center"><img src="https://github.com/sumitkumar1503/online-exam-system/blob/master/screenshots/adminmanagequestion.png" width="90%"></td>
-</tr>
-</table>
+- Admin login
+- Dashboard
+- Create/manage administrator accounts
+- Manage students
+- Delete student accounts
+- Reset student passwords
+- Manage subjects/courses
+- Create and manage exams
+- Assign exams to subjects
+- Add, edit and delete questions
+- View examination results
+- View payment/enrollment records
+- View successful payments and revenue
+- Email center for sending emails to students
+- Role-based access control
 
 ---
 
-# ✨ Features
+### 👨‍🎓 Student Features
 
-## 👨‍💻 Admin Features
-- Secure Admin Login
-- Stats Dashboard (Total Students, Exams, Questions, Submissions)
-- **Exam CRUD** (title, duration, description)
-- **Question CRUD** per exam
-- Cascade deletes for exams → questions → results
-- Protect answered questions from accidental delete
-- Manage Students
-- Reset Student Password
-- Delete Student Account (cascade all related data)
-- View all submissions for any exam
+Students can use the system to access subjects, enroll in courses and take examinations.
 
----
-
-## 🧑‍🎓 Student Features
-- Student Registration (Full Name, Email, Mobile, Profile Picture)
-- Secure Login
-- Dashboard with KPIs + Performance Chart
-- Take Exam (paginated interface + question palette)
-- Live Timer (auto submit)
-- Instant Results (score, percentage, pass/fail)
-- Detailed Review Page (correct vs incorrect answers)
-- Profile Update
-- Upload New Profile Picture
-- Change Password
-- View All Previous Exam Results
+- Student registration
+- Student login/logout
+- Student dashboard
+- View available subjects
+- Access free subjects
+- Purchase paid subjects
+- Razorpay online payment
+- Course enrollment
+- Subscription/access expiry handling
+- View available exams
+- Attempt exams
+- Submit answers
+- View examination results
+- AI Exam Assistant chatbot
 
 ---
 
-# 🛠️ Tech Stack
+### 🤖 AI Exam Assistant
 
-| Layer | Technology                                 |
-|------|--------------------------------------------|
-| Backend | Spring Boot 3, Spring Security 6           |
-| Frontend | Thymeleaf, Html, Bootstrap 5, Chart.js     |
-| Database | H2 (file-based) (configurable to other DB) |
-| ORM | Hibernate / JPA                            |
-| Build | Maven                                      |
-| Storage | Local File System for images               |
+The project includes an AI-powered chatbot using **Google Gemini**.
+
+Students can ask questions related to:
+
+- Examinations
+- Exam instructions
+- Subjects
+- Course enrollment
+- Payments
+- Results
+- Java
+- Python
+- CSE
+- Programming
+- Data Structures
+- Algorithms
+- Databases
+- Web Development
+
+The chatbot is integrated into the student interface and communicates with the backend through a secure API endpoint.
 
 ---
 
-# 🚀 How to Run the Project
+### 💳 Razorpay Payment Integration
 
-### ✔️ Prerequisites
-- Java **17+**
+Paid subjects/courses can be purchased through Razorpay.
+
+Payment workflow:
+
+1. Student selects a paid subject.
+2. Backend creates a Razorpay order.
+3. Razorpay Checkout processes the payment.
+4. Payment details are returned to the application.
+5. Backend verifies the Razorpay signature.
+6. Successful enrollment is stored in PostgreSQL.
+7. Subscription expiry is calculated according to the selected duration.
+
+Supported subscription types include:
+
+- FREE
+- MONTHLY
+- YEARLY
+- LIFETIME
+
+Razorpay should be configured using environment variables. Never commit API secrets to GitHub.
+
+---
+
+### 📧 Email Center
+
+Administrators can send emails from the Admin Email Center.
+
+The application uses Gmail SMTP with:
+
+- SMTP host: `smtp.gmail.com`
+- SMTP port: `587`
+- STARTTLS
+- SMTP authentication
+
+Email credentials are supplied through environment variables.
+
+---
+
+## 🛠️ Technology Stack
+
+### Backend
+
+- Java 17
+- Spring Boot 3.2.0
+- Spring MVC
+- Spring Security
+- Spring Data JPA
+- Hibernate
 - Maven
-- Any IDE (IntelliJ, VS Code, Eclipse)
+
+### Frontend
+
+- Thymeleaf
+- HTML5
+- CSS3
+- JavaScript
+
+### Database
+
+- PostgreSQL
+
+### Integrations
+
+- Razorpay
+- Google Gemini AI
+- Gmail SMTP
+
+### Development Tools
+
+- Git
+- GitHub
+- IntelliJ IDEA / VS Code
+- pgAdmin
+- Maven Wrapper
 
 ---
 
-### ✔️ Clone the Repository
+## 📂 Project Structure
 
-```bash
-git clone https://github.com/sumitkumar1503/online-exam-system.git
-cd online-exam-system
+```text
+online-exam-system-master/
+│
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/example/exam/
+│   │   │       ├── config/
+│   │   │       ├── controller/
+│   │   │       ├── dto/
+│   │   │       ├── model/
+│   │   │       ├── repository/
+│   │   │       └── service/
+│   │   │
+│   │   └── resources/
+│   │       ├── static/
+│   │       ├── templates/
+│   │       └── application.properties
+│   │
+│   └── test/
+│
+├── uploads/
+├── pom.xml
+├── mvnw
+├── mvnw.cmd
+└── README.md
 ```
 
 ---
 
-### ✔️ Start the Application
+## ⚙️ Requirements
 
-Open the project → Run:
+Install the following before running the project:
 
-`OnlineExamApplication.java`
+- Java 17
+- PostgreSQL
+- Git
+- Internet connection for external services
+- A Google Gemini API key
+- Razorpay Test Mode credentials
+- Gmail SMTP credentials if email functionality is required
 
-Server will start at:
-
-👉 http://localhost:7890
+Maven does not need to be installed separately because the project includes the Maven Wrapper.
 
 ---
 
-# 🗄️ Database (H2)
+# 🗄️ PostgreSQL Database Setup
 
-Access H2 Console:
+Create a PostgreSQL database named:
 
-👉 http://localhost:7890/h2-console
-
+```text
+online_exam_db
 ```
-JDBC URL : jdbc:h2:file:./data/examdb  
-Username : sa  
-Password : password
+
+The application uses:
+
+```text
+Host: localhost
+Port: 5432
+Database: online_exam_db
+Username: postgres
+```
+
+The project uses Hibernate:
+
+```properties
+spring.jpa.hibernate.ddl-auto=update
+```
+
+Therefore, the application can update the database schema without requiring the database to be recreated every time.
+
+---
+
+# 🔐 Environment Variables
+
+Sensitive credentials should not be written directly into source code.
+
+Configure the following environment variables before starting the application:
+
+```text
+DB_PASSWORD
+MAIL_USERNAME
+MAIL_PASSWORD
+RAZORPAY_KEY_ID
+RAZORPAY_KEY_SECRET
+GEMINI_API_KEY
+```
+
+The application properties use these variables instead of storing secrets directly.
+
+### Windows PowerShell example
+
+```powershell
+$env:DB_PASSWORD="your_postgresql_password"
+$env:MAIL_USERNAME="your_gmail_address"
+$env:MAIL_PASSWORD="your_gmail_app_password"
+$env:RAZORPAY_KEY_ID="your_razorpay_test_key"
+$env:RAZORPAY_KEY_SECRET="your_razorpay_test_secret"
+$env:GEMINI_API_KEY="your_gemini_api_key"
+```
+
+Do not commit real credentials or API keys to GitHub.
+
+---
+
+# ▶️ How to Run the Project
+
+## 1. Open the project directory
+
+Open PowerShell in the project root:
+
+```text
+online-exam-system-master
 ```
 
 ---
 
-# 🔐 Default Admin User
+## 2. Configure PostgreSQL
 
-| Username | Password |
-|---------|----------|
-| admin | adminpass |
+Make sure PostgreSQL is running and the database exists:
 
----
-
-# 📜 License
-
-This project is **open-source** under the **MIT License**.
+```text
+online_exam_db
+```
 
 ---
 
-<p align="center">
-<strong>Happy Coding ❤️</strong>
-</p>
+## 3. Configure environment variables
 
+Set the required environment variables described above.
 
-## UI refresh
+---
 
-The application now uses a shared responsive visual theme at `src/main/resources/static/css/app.css`. All Thymeleaf pages load this stylesheet so navigation, forms, tables, buttons, cards, dashboards and exam-taking screens use a consistent interface. The shared navbar is branded **ExamFlow**. Existing routes, Thymeleaf bindings, form actions and controller names were intentionally preserved.
+## 4. Start the Spring Boot application
 
-### Run locally (Windows PowerShell)
+On Windows:
 
-1. Ensure PostgreSQL is running and the configured `online_exam_db` database exists.
-2. In PowerShell, set your local PostgreSQL password for this terminal with `$env:DB_PASSWORD="your-local-postgres-password"`. Do not publish real credentials. The application reads it from the `DB_PASSWORD` environment variable.
-3. From this project directory run `./mvnw.cmd spring-boot:run` (or `mvn spring-boot:run` if Maven is installed).
-4. Open `http://localhost:7890`.
+```powershell
+.\mvnw.cmd spring-boot:run
+```
 
-This refresh is a UI pass on the supplied Thymeleaf application; it does not yet convert it into the separate React frontend / REST API architecture or add the requested subscription, Razorpay and scheduled-email features. Those require additional backend work and credentials configured locally.
+Alternatively, the project can be opened in an IDE and run as a Spring Boot application.
+
+---
+
+## 5. Open the application
+
+The application runs on port:
+
+```text
+7890
+```
+
+Open:
+
+```text
+http://localhost:7890
+```
+
+---
+
+# 🔑 Authentication and Roles
+
+The application uses Spring Security with role-based authorization.
+
+### ADMIN
+
+Administrators can access:
+
+```text
+/admin/**
+```
+
+### STUDENT
+
+Students can access:
+
+```text
+/student/**
+/exam/**
+```
+
+The login system redirects users according to their role.
+
+---
+
+# 🧪 Examination Workflow
+
+The typical examination workflow is:
+
+```text
+Admin
+  ↓
+Create Subject
+  ↓
+Create Exam
+  ↓
+Assign Exam to Subject
+  ↓
+Add Questions
+  ↓
+Publish/Make Exam Available
+  ↓
+Student
+  ↓
+Access Subject
+  ↓
+Attempt Exam
+  ↓
+Submit Answers
+  ↓
+View Result
+```
+
+---
+
+# 💰 Paid Course Workflow
+
+```text
+Student
+  ↓
+Select Paid Subject
+  ↓
+Create Razorpay Order
+  ↓
+Razorpay Checkout
+  ↓
+Payment
+  ↓
+Signature Verification
+  ↓
+Course Enrollment
+  ↓
+Access Subject
+  ↓
+Subscription Expiry
+```
+
+---
+
+# 🤖 Chatbot Workflow
+
+```text
+Student
+  ↓
+Enter Question
+  ↓
+Student Dashboard Chatbot
+  ↓
+/api/chatbot/message
+  ↓
+GeminiService
+  ↓
+Google Gemini API
+  ↓
+AI Response
+  ↓
+Chatbot UI
+```
+
+The application also handles temporary AI-service failures and retries the Gemini request before returning a fallback response.
+
+---
+
+# 📧 Email Workflow
+
+```text
+Admin
+  ↓
+Email Center
+  ↓
+Enter Recipient
+  ↓
+Enter Subject
+  ↓
+Enter Message
+  ↓
+Gmail SMTP
+  ↓
+Email Sent
+```
+
+---
+
+# 🔒 Security
+
+Security features include:
+
+- Spring Security authentication
+- BCrypt password hashing
+- Role-based authorization
+- CSRF protection
+- Secure login/logout
+- Protected Admin routes
+- Protected Student routes
+- Razorpay payment signature verification
+- Environment-based secret configuration
+
+---
+
+# 🧩 Important API Endpoints
+
+### Authentication
+
+```text
+/login
+/register
+/logout
+```
+
+### Payment
+
+```text
+POST /api/payment/create-order/{subjectId}
+POST /api/payment/verify
+```
+
+### Chatbot
+
+```text
+POST /api/chatbot/message
+```
+
+### Admin
+
+```text
+/admin/dashboard
+/admin/students
+/admin/exams
+/admin/questions
+/admin/results
+/admin/payments
+/admin/email-center
+```
+
+### Student
+
+```text
+/student/dashboard
+/student/**
+/exam/**
+```
+
+---
+
+# 🗃️ Main Backend Components
+
+The project contains components for:
+
+- Users
+- Subjects
+- Exams
+- Questions
+- Exam Attempts
+- Student Answers
+- Exam Results
+- Course Enrollments
+- Payments
+- Authentication
+- Email
+- AI Chatbot
+
+The application follows a layered Spring Boot architecture:
+
+```text
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+JPA / Hibernate
+    ↓
+PostgreSQL
+```
+
+---
+
+# 🧑‍💻 Development
+
+### Build the project
+
+```powershell
+.\mvnw.cmd clean package
+```
+
+### Run the project
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+### Check Git status
+
+```powershell
+git status
+```
+
+### Commit changes
+
+```powershell
+git add .
+git commit -m "Update project"
+```
+
+### Push changes to GitHub
+
+```powershell
+git push
+```
+
+---
+
+# 📌 Configuration File
+
+The main application configuration is:
+
+```text
+src/main/resources/application.properties
+```
+
+It contains configuration for:
+
+- Application port
+- PostgreSQL
+- JPA/Hibernate
+- File uploads
+- Gmail SMTP
+- Razorpay
+- Environment variables
+
+Secrets should always remain outside the repository.
+
+---
+
+# 📦 Deployment Notes
+
+Before deploying the application:
+
+1. Configure PostgreSQL.
+2. Configure all required environment variables.
+3. Configure Razorpay production credentials if moving from test mode.
+4. Configure Gmail SMTP credentials.
+5. Configure Gemini API access.
+6. Build the Spring Boot application.
+7. Deploy the generated application to the target server.
+
+Never expose:
+
+```text
+DB_PASSWORD
+MAIL_PASSWORD
+RAZORPAY_KEY_SECRET
+GEMINI_API_KEY
+```
+
+in source code or public repositories.
+
+---
+
+# 📝 Project Status
+
+The project currently includes:
+
+- ✅ Admin authentication
+- ✅ Student authentication
+- ✅ Student management
+- ✅ Subject/course management
+- ✅ Exam management
+- ✅ Question management
+- ✅ Online examination
+- ✅ Results
+- ✅ Free and paid subjects
+- ✅ Razorpay payment integration
+- ✅ Course enrollment
+- ✅ Subscription expiry
+- ✅ Email Center
+- ✅ AI Exam Assistant chatbot
+- ✅ PostgreSQL database
+- ✅ Spring Security
+- ✅ Git/GitHub version control
+
+---
+
+# 👥 Intended Users
+
+### Administrator
+
+Manages:
+
+- Students
+- Subjects
+- Exams
+- Questions
+- Results
+- Payments
+- Emails
+
+### Student
+
+Uses:
+
+- Subjects
+- Course enrollment
+- Payments
+- Exams
+- Results
+- AI Exam Assistant
+
+---
+
+# 📄 License
+
+This project is developed as an academic/project implementation.
+
+Copyright © 2026.
