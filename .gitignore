@@ -1,11 +1,32 @@
-﻿target/
+﻿
+# Maven / Build
+target/
+build/
+
+# Uploaded files
 uploads/
+
+# Environment secrets
 .env
+.env.*
+!.env.example
+
+# Logs
 *.log
-*.txt
+
+# IDE
 .idea/
 .vscode/
 *.iml
 .classpath
 .project
 .settings/
+
+# Local database files
+*.db
+*.sqlite
+*.mv.db
+
+# OS files
+.DS_Store
+Thumbs.db
