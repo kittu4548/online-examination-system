@@ -1,31 +1,41 @@
 package com.example.exam.service;
 
 import com.google.genai.Client;
+import com.google.genai.types.HttpOptions;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GeminiService {
 
     private final Client client;
+    private final String model;
 
-    public GeminiService() {
+    public GeminiService(
+            @Value("${gemini.api-key:${GEMINI_API_KEY:}}") String apiKey,
+            @Value("${gemini.model:${GEMINI_MODEL:gemini-3.8-flash}}") String model,
+            @Value("${gemini.timeout-ms:${GEMINI_TIMEOUT_MS:15000}}") int timeoutMs) {
 
-        String apiKey = System.getenv("GEMINI_API_KEY");
+        this.model = model;
 
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException(
-                    "GEMINI_API_KEY environment variable is not configured."
-            );
+            this.client = null;
+            return;
         }
 
         this.client = Client.builder()
                 .apiKey(apiKey)
+                .httpOptions(HttpOptions.builder().timeout(timeoutMs).build())
                 .build();
     }
 
     public String generateResponse(String userMessage) {
+
+        if (client == null) {
+            return "The AI assistant is not configured. Please contact the administrator.";
+        }
 
         String systemPrompt = """
                 You are the AI Exam Assistant for an Online Examination System.
@@ -61,102 +71,28 @@ public class GeminiService {
                 + userMessage;
 
         /*
-         * Google currently documents gemini-3.8-flash for Java.
+         * Keep the model configurable because Google retires model aliases.
          */
-        String model = "gemini-3.8-flash";
+        try {
+            GenerateContentConfig config =
+                    GenerateContentConfig.builder()
+                            .maxOutputTokens(300)
+                            .build();
 
-        /*
-         * Retry temporary 503/429/network failures.
-         */
-        int maxAttempts = 3;
+            GenerateContentResponse response =
+                    client.models.generateContent(
+                            model,
+                            prompt,
+                            config
+                    );
 
-        Exception lastException = null;
-
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-
-            try {
-
-                GenerateContentConfig config =
-                        GenerateContentConfig.builder()
-                                .maxOutputTokens(500)
-                                .build();
-
-                GenerateContentResponse response =
-                        client.models.generateContent(
-                                model,
-                                prompt,
-                                config
-                        );
-
-                String text = response.text();
-
-                if (text != null && !text.isBlank()) {
-                    return text;
-                }
-
-                return "I couldn't generate an answer. Please try again.";
-
-            } catch (Exception e) {
-
-                lastException = e;
-
-                System.err.println(
-                        "Gemini attempt "
-                                + attempt
-                                + "/"
-                                + maxAttempts
-                                + " failed: "
-                                + e.getMessage()
-                );
-
-                if (attempt < maxAttempts) {
-
-                    try {
-
-                        /*
-                         * Exponential backoff:
-                         * attempt 1 -> wait 2 seconds
-                         * attempt 2 -> wait 4 seconds
-                         */
-                        long delay =
-                                (long) Math.pow(2, attempt) * 1000;
-
-                        System.out.println(
-                                "Retrying Gemini in "
-                                        + delay
-                                        + " ms..."
-                        );
-
-                        Thread.sleep(delay);
-
-                    } catch (InterruptedException interruptedException) {
-
-                        Thread.currentThread().interrupt();
-
-                        throw new RuntimeException(
-                                "Gemini request interrupted.",
-                                interruptedException
-                        );
-                    }
-                }
-            }
+            String text = response.text();
+            return text != null && !text.isBlank()
+                    ? text
+                    : "I couldn't generate an answer. Please try again.";
+        } catch (Exception e) {
+            System.err.println("Gemini request failed: " + e.getMessage());
+            return "The AI assistant is temporarily unavailable. Please try again.";
         }
-
-        /*
-         * Gemini is temporarily unavailable.
-         * Return a useful response instead of crashing the chatbot.
-         */
-        System.err.println(
-                "Gemini unavailable after "
-                        + maxAttempts
-                        + " attempts."
-        );
-
-        return """
-                I'm temporarily unable to connect to the AI service.
-
-                You can still use the examination system normally.
-                Please try your question again in a few moments.
-                """;
     }
 }

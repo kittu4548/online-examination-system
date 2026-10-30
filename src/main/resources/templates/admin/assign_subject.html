@@ -34,9 +34,9 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
 
-            <form th:action="@{/admin/assign-subject}" method="post">
+            <form th:action="@{/admin/exams/{examId}/subject(examId=${exam.id})}" method="post">
 
-                <div class="mb-3">
+                <div class="mb-3" th:if="${exam == null}">
                     <label for="examId" class="form-label">
                         Select Exam
                     </label>
@@ -78,7 +78,7 @@
                     Assign Exam
                 </button>
 
-                <a th:href="@{/admin/manage-exams}"
+                <a th:href="@{/admin/exams}"
                    class="btn btn-outline-secondary ms-2">
                     Back to Exams
                 </a>

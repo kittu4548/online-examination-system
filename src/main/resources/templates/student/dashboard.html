@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -31,6 +31,7 @@
 
     <!-- Razorpay -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script th:src="@{/js/payment.js(v=4)}" defer></script>
 
     <style>
 
@@ -400,7 +401,7 @@
                                 </div>
 
                                 <a
-                                        th:href="@{'/student/subject/' + ${subject.id}}"
+                                        th:href="@{/student/subject/{id}(id=${subject.id})}"
                                         class="btn btn-success free-btn">
 
                                     <i class="bi bi-book-half me-1"></i>
@@ -425,7 +426,7 @@
 
                                 <div class="price mt-2">
 
-                                    ₹<span
+                                    &#8377;<span
                                         th:text="${subject.price}">
                                         0
                                     </span>
@@ -442,7 +443,7 @@
                                             data-subject-id=${subject.id},
                                             data-subject-name=${subject.name},
                                             data-price=${subject.price}"
-                                        onclick="startPayment(this)">
+                                        data-payment-button="true">
 
                                     <i class="bi bi-credit-card me-1"></i>
 
@@ -526,7 +527,7 @@
                         </th>
 
                         <th>
-                            Total Marks
+                            Marks
                         </th>
 
                         <th>
@@ -555,7 +556,7 @@
                         <td>
 
                             <span
-                                    th:text="${exam.durationMinutes + ' minutes'}">
+                                    th:text="${exam.durationInMinutes + ' minutes'}">
                                 30 minutes
                             </span>
 
@@ -565,8 +566,8 @@
                         <td>
 
                             <span
-                                    th:text="${exam.totalMarks}">
-                                10
+                                    class="text-muted">
+                                See exam
                             </span>
 
                         </td>
@@ -575,7 +576,7 @@
                         <td>
 
                             <a
-                                    th:href="@{'/student/exam/' + ${exam.id}}"
+                                    th:href="@{/exam/{id}(id=${exam.id})}"
                                     class="btn btn-primary btn-sm">
 
                                 <i class="bi bi-play-circle me-1"></i>
@@ -670,7 +671,8 @@
 
                     <tbody>
 
-                    <tr th:each="result : ${results}">
+                    <tr                     th:each="result : ${results}"
+                    th:with="percentage=${result.totalMarks > 0 ? (result.scoreAchieved * 100.0 / result.totalMarks) : 0}">
 
                         <td>
 
@@ -685,7 +687,7 @@
                         <td>
 
                             <span
-                                    th:text="${result.score}">
+                                    th:text="${result.scoreAchieved + ' / ' + result.totalMarks}">
                                 0
                             </span>
 
@@ -695,7 +697,7 @@
                         <td>
 
                             <span
-                                    th:text="${result.percentage + '%'}">
+                                    th:text="${#numbers.formatDecimal(percentage, 1, 1) + '%'}">
                                 0%
                             </span>
 
@@ -705,7 +707,7 @@
                         <td>
 
                             <span
-                                    th:if="${result.percentage >= 40}"
+                                    th:if="${percentage >= 40}"
                                     class="badge bg-success">
 
                                 Passed
@@ -714,7 +716,7 @@
 
 
                             <span
-                                    th:if="${result.percentage < 40}"
+                                    th:if="${percentage < 40}"
                                     class="badge bg-danger">
 
                                 Failed
@@ -727,7 +729,7 @@
                         <td>
 
                             <a
-                                    th:href="@{'/student/result/' + ${result.id}}"
+                                    th:href="@{/student/review/{id}(id=${result.id})}"
                                     class="btn btn-outline-primary btn-sm">
 
                                 <i class="bi bi-eye me-1"></i>
@@ -751,503 +753,6 @@
     </div>
 
 </div>
-
-
-<!-- ====================================================== -->
-<!-- PAYMENT JAVASCRIPT -->
-<!-- ====================================================== -->
-
-<script>
-
-async function startPayment(button) {
-
-    const subjectId =
-        button.getAttribute("data-subject-id");
-
-    const subjectName =
-        button.getAttribute("data-subject-name");
-
-    const statusElement =
-        document.getElementById(
-            "payment-status-" + subjectId
-        );
-
-
-    if (!subjectId) {
-
-        alert("Invalid course.");
-
-        return;
-    }
-
-
-    button.disabled = true;
-
-    button.innerHTML =
-        '<span class="spinner-border spinner-border-sm me-1"></span>' +
-        'Starting Payment...';
-
-
-    if (statusElement) {
-
-        statusElement.innerHTML =
-            '<span class="text-muted">' +
-            'Creating secure payment...' +
-            '</span>';
-    }
-
-
-    try {
-
-        /* ==================================================
-           CSRF
-           ================================================== */
-
-        const csrfTokenElement =
-            document.querySelector(
-                'meta[name="_csrf"]'
-            );
-
-        const csrfHeaderElement =
-            document.querySelector(
-                'meta[name="_csrf_header"]'
-            );
-
-
-        if (!csrfTokenElement ||
-            !csrfHeaderElement) {
-
-            throw new Error(
-                "CSRF token not found. Please refresh the page."
-            );
-        }
-
-
-        const csrfToken =
-            csrfTokenElement.getAttribute("content");
-
-        const csrfHeader =
-            csrfHeaderElement.getAttribute("content");
-
-
-        console.log(
-            "Subject ID:",
-            subjectId
-        );
-
-        console.log(
-            "CSRF Header:",
-            csrfHeader
-        );
-
-        console.log(
-            "CSRF Token Available:",
-            !!csrfToken
-        );
-
-
-        /* ==================================================
-           HEADERS
-           ================================================== */
-
-        const headers = {
-
-            "Content-Type":
-                "application/json"
-
-        };
-
-
-        headers[csrfHeader] =
-            csrfToken;
-
-
-        /* ==================================================
-           CREATE RAZORPAY ORDER
-           ================================================== */
-
-        const response =
-            await fetch(
-                "/student/payment/create/" +
-                subjectId,
-                {
-                    method: "POST",
-                    headers: headers
-                }
-            );
-
-
-        console.log(
-            "Create Payment Status:",
-            response.status
-        );
-
-
-        if (!response.ok) {
-
-            const errorText =
-                await response.text();
-
-            console.error(
-                "Create Payment Error:",
-                errorText
-            );
-
-            throw new Error(
-                errorText ||
-                "Unable to create payment order."
-            );
-        }
-
-
-        /* ==================================================
-           PAYMENT RESPONSE
-           ================================================== */
-
-        const payment =
-            await response.json();
-
-
-        console.log(
-            "Razorpay Order Created:",
-            payment
-        );
-
-
-        /* ==================================================
-           CHECK RAZORPAY
-           ================================================== */
-
-        if (!window.Razorpay) {
-
-            throw new Error(
-                "Razorpay Checkout failed to load. " +
-                "Please check your internet connection."
-            );
-        }
-
-
-        /* ==================================================
-           RAZORPAY OPTIONS
-           ================================================== */
-
-        const options = {
-
-            key:
-                payment.keyId,
-
-            amount:
-                payment.amount,
-
-            currency:
-                payment.currency || "INR",
-
-            order_id:
-                payment.razorpayOrderId,
-
-            name:
-                "Online Examination System",
-
-            description:
-                "Course: " + subjectName,
-
-
-            /* ==============================================
-               SUCCESS
-               ============================================== */
-
-            handler:
-                async function (razorpayResponse) {
-
-                    console.log(
-                        "Razorpay Response:",
-                        razorpayResponse
-                    );
-
-
-                    if (statusElement) {
-
-                        statusElement.innerHTML =
-                            '<span class="text-muted">' +
-                            'Verifying payment...' +
-                            '</span>';
-                    }
-
-
-                    try {
-
-                        const verifyResponse =
-                            await fetch(
-                                "/student/payment/verify",
-                                {
-                                    method: "POST",
-
-                                    headers: headers,
-
-                                    body:
-                                        JSON.stringify({
-
-                                            subjectId:
-                                                Number(
-                                                    subjectId
-                                                ),
-
-                                            razorpayOrderId:
-                                                razorpayResponse
-                                                    .razorpay_order_id,
-
-                                            razorpayPaymentId:
-                                                razorpayResponse
-                                                    .razorpay_payment_id,
-
-                                            razorpaySignature:
-                                                razorpayResponse
-                                                    .razorpay_signature
-
-                                        })
-                                }
-                            );
-
-
-                        console.log(
-                            "Verify Payment Status:",
-                            verifyResponse.status
-                        );
-
-
-                        if (!verifyResponse.ok) {
-
-                            const errorText =
-                                await verifyResponse.text();
-
-                            console.error(
-                                "Verify Payment Error:",
-                                errorText
-                            );
-
-                            throw new Error(
-                                errorText ||
-                                "Payment verification failed."
-                            );
-                        }
-
-
-                        const result =
-                            await verifyResponse.json();
-
-
-                        console.log(
-                            "Payment Verification:",
-                            result
-                        );
-
-
-                        if (statusElement) {
-
-                            statusElement.innerHTML =
-                                '<span class="text-success fw-bold">' +
-
-                                '<i class="bi bi-check-circle-fill"></i> ' +
-
-                                'Payment successful!' +
-
-                                '</span>';
-                        }
-
-
-                        button.disabled = true;
-
-
-                        button.classList.remove(
-                            "btn-primary"
-                        );
-
-
-                        button.classList.add(
-                            "btn-success"
-                        );
-
-
-                        button.innerHTML =
-                            '<i class="bi bi-check-circle me-1"></i>' +
-                            'Paid';
-
-
-                        alert(
-                            "Payment successful! " +
-                            "You now have access to " +
-                            subjectName +
-                            "."
-                        );
-
-
-                        setTimeout(
-                            function () {
-
-                                window.location.reload();
-
-                            },
-                            1000
-                        );
-
-                    }
-                    catch (error) {
-
-                        console.error(
-                            "Payment verification error:",
-                            error
-                        );
-
-
-                        if (statusElement) {
-
-                            statusElement.innerHTML =
-                                '<span class="text-danger">' +
-
-                                '<i class="bi bi-x-circle"></i> ' +
-
-                                error.message +
-
-                                '</span>';
-                        }
-
-
-                        button.disabled = false;
-
-
-                        button.innerHTML =
-                            '<i class="bi bi-credit-card me-1"></i>' +
-                            'Pay Now';
-                    }
-
-                },
-
-
-            /* ==============================================
-               CHECKOUT CLOSED
-               ============================================== */
-
-            modal: {
-
-                ondismiss:
-                    function () {
-
-                        console.log(
-                            "Razorpay checkout closed."
-                        );
-
-
-                        if (statusElement) {
-
-                            statusElement.innerHTML =
-                                '<span class="text-warning">' +
-
-                                'Payment window closed.' +
-
-                                '</span>';
-                        }
-
-
-                        button.disabled = false;
-
-
-                        button.innerHTML =
-                            '<i class="bi bi-credit-card me-1"></i>' +
-                            'Pay Now';
-                    }
-
-            }
-
-        };
-
-
-        /* ==================================================
-           RAZORPAY INSTANCE
-           ================================================== */
-
-        const razorpay =
-            new window.Razorpay(
-                options
-            );
-
-
-        /* ==================================================
-           PAYMENT FAILED
-           ================================================== */
-
-        razorpay.on(
-            "payment.failed",
-            function (response) {
-
-                console.error(
-                    "Payment Failed:",
-                    response
-                );
-
-
-                if (statusElement) {
-
-                    statusElement.innerHTML =
-                        '<span class="text-danger">' +
-
-                        '<i class="bi bi-x-circle"></i> ' +
-
-                        'Payment failed.' +
-
-                        '</span>';
-                }
-
-
-                button.disabled = false;
-
-
-                button.innerHTML =
-                    '<i class="bi bi-credit-card me-1"></i>' +
-                    'Pay Now';
-
-            }
-        );
-
-
-        /* ==================================================
-           OPEN CHECKOUT
-           ================================================== */
-
-        razorpay.open();
-
-    }
-    catch (error) {
-
-        console.error(
-            "Payment Initialization Error:",
-            error
-        );
-
-
-        if (statusElement) {
-
-            statusElement.innerHTML =
-                '<span class="text-danger">' +
-
-                '<i class="bi bi-x-circle"></i> ' +
-
-                error.message +
-
-                '</span>';
-        }
-
-
-        button.disabled = false;
-
-
-        button.innerHTML =
-            '<i class="bi bi-credit-card me-1"></i>' +
-            'Pay Now';
-    }
-
-}
-
-</script>
 
 
 <!-- ====================================================== -->

@@ -20,7 +20,7 @@
                 </div>
                 <div class="card-body">
                     <!-- Form is pre-filled with th:object -->
-                    <form th:action="@{/admin/question/update/{id}(id=${question.id})}" th:object="${question}" method="post">
+                    <form th:action="@{/admin/questions/save}" th:object="${question}" method="post">
 
                         <!-- Question Text -->
                         <div class="mb-3">
@@ -69,7 +69,7 @@
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
                             <!-- Cancel button redirects back to the manage page -->
-                            <a th:href="@{/admin/exam/manage-questions/{id}(id=${question.exam.id})}" class="btn btn-secondary me-md-2">Cancel</a>
+                            <a th:href="@{/admin/questions}" class="btn btn-secondary me-md-2">Cancel</a>
                             <button type="submit" class="btn btn-primary">Update Question</button>
                         </div>
                     </form>

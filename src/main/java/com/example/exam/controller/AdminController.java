@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Controller
@@ -64,6 +65,8 @@ public class AdminController {
     public String dashboard(Model model) {
 
         List<Exam> exams = examRepository.findAll();
+        List<Question> questions = questionRepository.findAll();
+        List<ExamResult> submissions = examResultRepository.findAll();
 
         List<User> students = userRepository.findAll()
                 .stream()
@@ -76,6 +79,25 @@ public class AdminController {
         model.addAttribute("exams", exams);
         model.addAttribute("students", students);
         model.addAttribute("subjects", subjects);
+        model.addAttribute("totalStudents", students.size());
+        model.addAttribute("totalExams", exams.size());
+        model.addAttribute("totalQuestions", questions.size());
+        model.addAttribute("totalSubmissions", submissions.size());
+        model.addAttribute("results", submissions);
+
+        List<String> chartLabels = new ArrayList<>();
+        List<Integer> chartData = new ArrayList<>();
+        submissions.stream()
+                .collect(Collectors.groupingBy(
+                        result -> result.getExam().getTitle(),
+                        java.util.LinkedHashMap::new,
+                        Collectors.counting()))
+                .forEach((title, count) -> {
+                    chartLabels.add(title);
+                    chartData.add(count.intValue());
+                });
+        model.addAttribute("chartLabels", chartLabels);
+        model.addAttribute("chartData", chartData);
 
         return "admin/dashboard";
     }

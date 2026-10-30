@@ -19,6 +19,13 @@ public interface CourseEnrollmentRepository
             String status
     );
 
+    Optional<CourseEnrollment>
+    findFirstByStudentIdAndSubjectIdAndStatusOrderByPurchasedAtDesc(
+            Long studentId,
+            Long subjectId,
+            String status
+    );
+
     List<CourseEnrollment> findAllByOrderByPurchasedAtDesc();
 
     boolean existsByStudentIdAndSubjectIdAndStatus(

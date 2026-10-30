@@ -30,7 +30,7 @@
           <a class="nav-link" th:href="@{/admin/dashboard}">Dashboard</a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-          <a class="nav-link" th:href="@{/admin/manage-exams}">Manage Exams</a>
+          <a class="nav-link" th:href="@{/admin/exams}">Manage Exams</a>
         </li>
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
           <a class="nav-link" th:href="@{/admin/students}">Manage Students</a>

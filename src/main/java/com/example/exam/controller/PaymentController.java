@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -114,6 +115,25 @@ public class PaymentController {
                         ));
             }
 
+            CourseEnrollment pendingEnrollment =
+                            enrollmentRepository
+                                    .findFirstByStudentIdAndSubjectIdAndStatusOrderByPurchasedAtDesc(
+                                            student.getId(), subject.getId(), "CREATED")
+                                    .orElse(null);
+
+            if (pendingEnrollment != null
+                            && pendingEnrollment.getRazorpayOrderId() != null) {
+                        return ResponseEntity.ok(orderResponse(
+                                pendingEnrollment.getRazorpayOrderId(),
+                                subject,
+                                pendingEnrollment.getAmount(),
+                                pendingEnrollment.getAmount()
+                                        .movePointRight(2)
+                                        .longValueExact(),
+                                "INR"
+                        ));
+            }
+
             String receipt =
                     "SUBJECT-" + subjectId + "-"
                             + System.currentTimeMillis();
@@ -124,50 +144,27 @@ public class PaymentController {
             );
 
             JSONObject orderJson = order.toJson();
+            pendingEnrollment = new CourseEnrollment();
+            pendingEnrollment.setStudent(student);
+            pendingEnrollment.setSubject(subject);
+            pendingEnrollment.setRazorpayOrderId(orderJson.getString("id"));
+            pendingEnrollment.setAmount(subject.getPrice());
+            pendingEnrollment.setStatus("CREATED");
+            pendingEnrollment.setPurchasedAt(LocalDateTime.now());
+            enrollmentRepository.save(pendingEnrollment);
 
-            Map<String, Object> response =
-                    new HashMap<>();
-
-            response.put(
-                    "keyId",
-                    razorpayService.getKeyId()
-            );
-
-            response.put(
-                    "razorpayOrderId",
-                    orderJson.getString("id")
-            );
-
-            response.put(
-                    "orderId",
-                    orderJson.getString("id")
-            );
-
-            response.put(
-                    "amount",
-                    orderJson.getLong("amount")
-            );
-
-            response.put(
-                    "currency",
+            return ResponseEntity.ok(orderResponse(
+                    orderJson.getString("id"),
+                    subject,
+                    pendingEnrollment.getAmount(),
+                    orderJson.getLong("amount"),
                     orderJson.getString("currency")
-            );
+            ));
 
-            response.put(
-                    "subjectId",
-                    subject.getId()
-            );
-
-            response.put(
-                    "subjectName",
-                    subject.getName()
-            );
-
-            return ResponseEntity.ok(response);
-
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(503)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-
-            e.printStackTrace();
 
             return ResponseEntity.internalServerError()
                     .body(Map.of(
@@ -183,6 +180,7 @@ public class PaymentController {
     // =========================================================
 
     @PostMapping("/verify")
+    @Transactional
     public ResponseEntity<?> verifyPayment(
             @RequestBody PaymentVerificationRequest request,
             Authentication authentication) {
@@ -254,6 +252,45 @@ public class PaymentController {
                                     "Student not found"
                             ));
 
+            CourseEnrollment existingPayment =
+                    enrollmentRepository.findByRazorpayPaymentId(
+                            request.getRazorpayPaymentId()).orElse(null);
+            if (existingPayment != null) {
+                if (student.equals(existingPayment.getStudent())
+                        && subject.equals(existingPayment.getSubject())) {
+                    return ResponseEntity.ok(
+                            Map.of(
+                                    "success", true,
+                                    "message", "Payment already verified"
+                            ));
+                }
+                return ResponseEntity.badRequest()
+                        .body(Map.of(
+                                "success", false,
+                                "message", "Payment is already associated with another enrollment"
+                        ));
+            }
+
+            CourseEnrollment enrollment =
+                    enrollmentRepository
+                            .findByRazorpayOrderId(
+                                    request.getRazorpayOrderId())
+                            .orElse(null);
+
+            if (enrollment == null
+                    || !student.equals(enrollment.getStudent())
+                    || !subject.equals(enrollment.getSubject())
+                    || enrollment.getAmount() == null
+                    || enrollment.getAmount().compareTo(subject.getPrice()) != 0
+                    || !"CREATED".equalsIgnoreCase(enrollment.getStatus())) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of(
+                                "success", false,
+                                "message",
+                                "Payment order does not match this subject or student"
+                        ));
+            }
+
             // -------------------------------------------------
             // 5. Verify Razorpay signature
             // -------------------------------------------------
@@ -275,40 +312,28 @@ public class PaymentController {
                         ));
             }
 
-            // -------------------------------------------------
-            // 6. Prevent duplicate payment
-            // -------------------------------------------------
-
-            if (enrollmentRepository
-                    .findByRazorpayPaymentId(
-                            request.getRazorpayPaymentId()
-                    )
-                    .isPresent()) {
-
-                return ResponseEntity.ok(
-                        Map.of(
-                                "success", true,
+            Order razorpayOrder =
+                    razorpayService.fetchOrder(
+                            request.getRazorpayOrderId());
+            JSONObject verifiedOrder = razorpayOrder.toJson();
+            long expectedAmountInPaise = enrollment.getAmount()
+                    .movePointRight(2)
+                    .longValueExact();
+            if (verifiedOrder.optLong("amount", -1)
+                    != expectedAmountInPaise
+                    || !"INR".equalsIgnoreCase(
+                            verifiedOrder.optString("currency"))) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of(
+                                "success", false,
                                 "message",
-                                "Payment already verified"
-                        )
-                );
+                                "Payment amount or currency does not match the order"
+                        ));
             }
 
             // -------------------------------------------------
-            // 7. Create enrollment
+            // 6. Complete the persisted enrollment
             // -------------------------------------------------
-
-            CourseEnrollment enrollment =
-                    new CourseEnrollment();
-
-            enrollment.setStudent(student);
-
-            enrollment.setSubject(subject);
-
-            enrollment.setRazorpayOrderId(
-                    request.getRazorpayOrderId()
-            );
-
             enrollment.setRazorpayPaymentId(
                     request.getRazorpayPaymentId()
             );
@@ -360,11 +385,16 @@ public class PaymentController {
             // Send a receipt to the account that completed payment.
             // Email failure must not undo a verified payment/enrollment.
             try {
-                if (student.getEmail() != null && !student.getEmail().isBlank()) {
+                if (!Boolean.TRUE.equals(
+                        enrollment.getConfirmationEmailSent())
+                        && student.getEmail() != null
+                        && !student.getEmail().isBlank()) {
                     emailService.sendPaymentConfirmation(
                             student.getEmail(), student.getFullName(),
                             subject.getName(), subject.getPrice(),
                             request.getRazorpayPaymentId(), purchasedAt);
+                    enrollment.setConfirmationEmailSent(true);
+                    enrollmentRepository.save(enrollment);
                 }
             } catch (Exception mailError) {
                 System.err.println("Payment verified, but confirmation email failed: "
@@ -394,5 +424,22 @@ public class PaymentController {
                             "Payment verification failed"
                     ));
         }
+    }
+
+    private Map<String, Object> orderResponse(
+            String orderId,
+            Subject subject,
+            BigDecimal amount,
+            long amountInPaise,
+            String currency) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("keyId", razorpayService.getKeyId());
+        response.put("razorpayOrderId", orderId);
+        response.put("orderId", orderId);
+        response.put("amount", amountInPaise);
+        response.put("currency", currency);
+        response.put("subjectId", subject.getId());
+        response.put("subjectName", subject.getName());
+        return response;
     }
 }

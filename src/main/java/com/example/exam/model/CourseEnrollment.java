@@ -44,6 +44,8 @@ public class CourseEnrollment {
     // For monthly/yearly subscriptions
     private LocalDateTime expiryDate;
 
+    @Column(nullable = true)
+    private Boolean confirmationEmailSent = false;
 
     // =========================
     // GETTERS AND SETTERS
@@ -119,5 +121,13 @@ public class CourseEnrollment {
 
     public void setExpiryDate(LocalDateTime expiryDate) {
         this.expiryDate = expiryDate;
+    }
+
+    public Boolean getConfirmationEmailSent() {
+        return confirmationEmailSent;
+    }
+
+    public void setConfirmationEmailSent(Boolean confirmationEmailSent) {
+        this.confirmationEmailSent = confirmationEmailSent;
     }
 }

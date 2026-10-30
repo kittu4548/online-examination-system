@@ -141,7 +141,7 @@ Email credentials are supplied through environment variables.
 
 ### Backend
 
-- Java 17
+- Java 21
 - Spring Boot 3.2.0
 - Spring MVC
 - Spring Security
@@ -212,7 +212,7 @@ online-exam-system-master/
 
 Install the following before running the project:
 
-- Java 17
+- Java 21
 - PostgreSQL
 - Git
 - Internet connection for external services
@@ -264,6 +264,9 @@ MAIL_PASSWORD
 RAZORPAY_KEY_ID
 RAZORPAY_KEY_SECRET
 GEMINI_API_KEY
+APP_BOOTSTRAP_ADMIN_USERNAME
+APP_BOOTSTRAP_ADMIN_EMAIL
+APP_BOOTSTRAP_ADMIN_PASSWORD
 ```
 
 The application properties use these variables instead of storing secrets directly.
@@ -277,6 +280,7 @@ $env:MAIL_PASSWORD="your_gmail_app_password"
 $env:RAZORPAY_KEY_ID="your_razorpay_test_key"
 $env:RAZORPAY_KEY_SECRET="your_razorpay_test_secret"
 $env:GEMINI_API_KEY="your_gemini_api_key"
+$env:GEMINI_MODEL="gemini-3.8-flash"
 ```
 
 Do not commit real credentials or API keys to GitHub.
@@ -323,7 +327,21 @@ Alternatively, the project can be opened in an IDE and run as a Spring Boot appl
 
 ---
 
-## 5. Open the application
+## 5. Run the tests
+
+The Maven test suite uses the `test` profile and an isolated in-memory H2
+database. It does not connect to, modify, or reset `online_exam_db`.
+
+```powershell
+.\mvnw.cmd clean test
+```
+
+Unit tests use Mockito and do not require a database. The Spring context test
+uses H2; PostgreSQL remains the runtime and production database.
+
+---
+
+## 6. Open the application
 
 The application runs on port:
 
@@ -491,8 +509,8 @@ Security features include:
 ### Payment
 
 ```text
-POST /api/payment/create-order/{subjectId}
-POST /api/payment/verify
+POST /student/payment/create/{subjectId}
+POST /student/payment/verify
 ```
 
 ### Chatbot
@@ -624,6 +642,17 @@ Before deploying the application:
 5. Configure Gemini API access.
 6. Build the Spring Boot application.
 7. Deploy the generated application to the target server.
+
+For a containerized deployment, build the application first and then use:
+
+```powershell
+.\mvnw.cmd clean package -DskipTests
+docker compose up --build
+```
+
+The Compose file uses a named PostgreSQL volume and does not drop or reset
+existing database tables. Use an existing PostgreSQL instance and a reviewed
+database migration process for production data.
 
 Never expose:
 

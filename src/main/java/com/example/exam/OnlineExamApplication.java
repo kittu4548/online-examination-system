@@ -9,6 +9,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 
 @SpringBootApplication
 public class OnlineExamApplication {
@@ -20,12 +21,20 @@ public class OnlineExamApplication {
     @Bean
     CommandLineRunner createAdminUser(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            @Value("${app.bootstrap-admin.username:}") String username,
+            @Value("${app.bootstrap-admin.email:}") String email,
+            @Value("${app.bootstrap-admin.password:}") String password) {
 
         return args -> {
 
-            String adminUsername = "admin";
-            String adminEmail = "admin@example.com";
+            if (username.isBlank() || email.isBlank() || password.isBlank()) {
+                System.out.println(">>> Admin bootstrap skipped: credentials are not configured. <<<");
+                return;
+            }
+
+            String adminUsername = username.trim();
+            String adminEmail = email.trim();
 
             // Check whether the username or email is already registered.
             if (userRepository.findByUsername(adminUsername).isPresent()
@@ -42,16 +51,14 @@ public class OnlineExamApplication {
             adminUser.setUsername(adminUsername);
             adminUser.setEmail(adminEmail);
             adminUser.setPassword(
-                passwordEncoder.encode("adminpass")
+                passwordEncoder.encode(password)
             );
             adminUser.setRole("ADMIN");
             adminUser.setFullName("Admin");
 
             userRepository.save(adminUser);
 
-            System.out.println(
-                ">>> Admin user created: admin / adminpass <<<"
-            );
+            System.out.println(">>> Configured bootstrap admin created. <<<");
         };
     }
 }

@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RazorpayConfig {
 
-    @Value("${razorpay.key.id}")
+    @Value("${razorpay.key.id:${RAZORPAY_KEY_ID:}}")
     private String keyId;
 
-    @Value("${razorpay.key.secret}")
+    @Value("${razorpay.key.secret:${RAZORPAY_KEY_SECRET:}}")
     private String keySecret;
 
     @Bean
@@ -34,6 +34,11 @@ public class RazorpayConfig {
 
         public String getKeySecret() {
             return keySecret;
+        }
+
+        public boolean isConfigured() {
+            return keyId != null && !keyId.isBlank()
+                    && keySecret != null && !keySecret.isBlank();
         }
     }
 }

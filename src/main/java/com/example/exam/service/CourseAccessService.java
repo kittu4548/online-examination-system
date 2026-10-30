@@ -2,6 +2,7 @@ package com.example.exam.service;
 
 import com.example.exam.model.CourseEnrollment;
 import com.example.exam.model.Exam;
+import com.example.exam.model.Subject;
 import com.example.exam.model.User;
 import com.example.exam.repository.CourseEnrollmentRepository;
 import org.springframework.stereotype.Service;
@@ -33,9 +34,16 @@ public class CourseAccessService {
             return true;
         }
 
+        return canAccessSubject(student, exam.getSubject());
+    }
+
+    public boolean canAccessSubject(
+            User student,
+            Subject subject) {
+
         // FREE subject
         if ("FREE".equalsIgnoreCase(
-                exam.getSubject().getAccessType())) {
+                subject.getAccessType())) {
 
             return true;
         }
@@ -45,7 +53,7 @@ public class CourseAccessService {
                 enrollmentRepository
                         .findByStudentIdAndSubjectIdAndStatus(
                                 student.getId(),
-                                exam.getSubject().getId(),
+                                subject.getId(),
                                 "PAID"
                         );
 

@@ -7,14 +7,21 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
+import com.example.exam.service.CourseAccessService;
 import java.util.Map;
 
 @Controller
 public class ProctorController {
  private final ProctorEventRepository events; private final UserRepository users; private final ExamRepository exams;
- public ProctorController(ProctorEventRepository events, UserRepository users, ExamRepository exams){this.events=events;this.users=users;this.exams=exams;}
+ private final CourseAccessService courseAccessService;
+ public ProctorController(ProctorEventRepository events, UserRepository users, ExamRepository exams,
+                          CourseAccessService courseAccessService){
+  this.events=events; this.users=users; this.exams=exams; this.courseAccessService=courseAccessService;
+ }
  @PostMapping("/exam/proctor/event") @ResponseBody
- public ResponseEntity<?> record(@RequestBody Map<String,Object> body, Authentication auth){
+ public ResponseEntity<?> record(@RequestBody Map<String,Object> body, Authentication auth,
+                                 HttpSession session){
   if(auth==null || !auth.isAuthenticated()) return ResponseEntity.status(401).body(Map.of("error","Unauthorized"));
   try {
    Long examId=Long.valueOf(String.valueOf(body.get("examId")));
@@ -22,6 +29,10 @@ public class ProctorController {
    if(!type.matches("TAB_HIDDEN|WINDOW_BLUR|FULLSCREEN_EXIT|TAB_VISIBLE")) return ResponseEntity.badRequest().body(Map.of("error","Invalid event"));
    User student=users.findByUsername(auth.getName()).orElseThrow();
    Exam exam=exams.findById(examId).orElseThrow();
+   if (!courseAccessService.canAccessExam(student, exam)
+       || session.getAttribute("examStart:" + examId) == null) {
+    return ResponseEntity.status(403).body(Map.of("error","Exam session is not active"));
+   }
    ProctorEvent event=new ProctorEvent(); event.setStudent(student); event.setExam(exam); event.setEventType(type);
    event.setDetails("Browser visibility/focus event reported by exam page"); events.save(event);
    return ResponseEntity.ok(Map.of("recorded",true));

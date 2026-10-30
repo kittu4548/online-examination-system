@@ -6,7 +6,6 @@ import com.razorpay.RazorpayClient;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import com.razorpay.Utils;
-import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -24,6 +23,8 @@ public class RazorpayService {
             BigDecimal amount,
             String receipt
     ) throws Exception {
+
+        requireConfigured();
 
         RazorpayClient razorpayClient =
                 new RazorpayClient(
@@ -45,11 +46,22 @@ public class RazorpayService {
 
         return razorpayClient.orders.create(orderRequest);
     }
+
+    public Order fetchOrder(String orderId) throws Exception {
+        requireConfigured();
+        return new RazorpayClient(
+                credentials.getKeyId(),
+                credentials.getKeySecret()
+        ).orders.fetch(orderId);
+    }
+
     public boolean verifyPayment(
         String orderId,
         String paymentId,
         String signature
 ) throws Exception {
+
+    requireConfigured();
 
     JSONObject attributes = new JSONObject();
 
@@ -62,7 +74,17 @@ public class RazorpayService {
             credentials.getKeySecret()
     );
 }
+
+private void requireConfigured() {
+    if (!credentials.isConfigured()) {
+        throw new IllegalStateException(
+                "Razorpay is not configured. Set RAZORPAY_KEY_ID and "
+                        + "RAZORPAY_KEY_SECRET before accepting payments.");
+    }
+}
+
 public String getKeyId() {
+    requireConfigured();
     return credentials.getKeyId();
 }
 }

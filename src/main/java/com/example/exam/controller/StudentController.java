@@ -12,6 +12,7 @@ import com.example.exam.repository.SubjectRepository;
 import com.example.exam.repository.UserRepository;
 
 import com.example.exam.service.FileStorageService;
+import com.example.exam.service.CourseAccessService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -50,6 +51,9 @@ public class StudentController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private CourseAccessService courseAccessService;
 
     private User getAuthenticatedUser() {
         Authentication authentication =
@@ -130,17 +134,56 @@ public class StudentController {
 
         List<Exam> availableExams = allExams.stream()
                 .filter(exam -> !takenExams.contains(exam))
+                .filter(exam -> exam.getSubject() == null
+                        || exam.getSubject().isPublished())
+                .filter(exam -> courseAccessService.canAccessExam(student, exam))
                 .collect(Collectors.toList());
 
         model.addAttribute("availableExams", availableExams);
+        model.addAttribute("exams", availableExams);
 
         // 5. Available published courses (NEW)
         List<Subject> availableSubjects =
                 subjectRepository.findByPublishedTrueOrderByNameAsc();
 
         model.addAttribute("availableSubjects", availableSubjects);
+        model.addAttribute("results", pastResults);
 
         return "student/dashboard";
+    }
+
+    @GetMapping("/subject/{subjectId}")
+    public String openSubject(
+            @PathVariable Long subjectId,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        User student = getAuthenticatedUser();
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new IllegalArgumentException("Subject not found"));
+
+        if (!subject.isPublished()) {
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "This subject is not currently published.");
+            return "redirect:/student/dashboard";
+        }
+
+        if (!courseAccessService.canAccessSubject(student, subject)) {
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Please purchase this subject to access its exams.");
+            return "redirect:/student/dashboard";
+        }
+
+        model.addAttribute("student", student);
+        model.addAttribute("subject", subject);
+        model.addAttribute(
+                "subjectExams",
+                examRepository.findBySubjectId(subjectId).stream()
+                        .filter(exam -> courseAccessService.canAccessExam(student, exam))
+                        .toList());
+        return "student/subject";
     }
 
     @GetMapping("/my-results")

@@ -20,8 +20,8 @@ public interface ExamResultRepository extends JpaRepository<ExamResult, Long> {
     List<ExamResult> findByStudent(User student);
     List<ExamResult> findByStudentOrderBySubmissionTimeDesc(User student);
     List<ExamResult> findTop5ByOrderBySubmissionTimeDesc();
+    boolean existsByStudentIdAndExamId(Long studentId, Long examId);
 
     @Transactional
     void deleteByStudent(User student);
 }
-
