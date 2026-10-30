@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review Exam: <span th:text="${exam.title}"></span></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Import Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+        }
+        .review-header {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+        .question-card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 0;
+            border-radius: 8px;
+        }
+        .question-card .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* This is the base style for an option */
+        .review-option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-top: 10px;
+            background-color: #fff;
+        }
+        .review-option .form-check-input {
+            margin-top: 0;
+            transform: scale(1.2);
+            margin-right: 10px;
+        }
+        .review-option .form-check-label {
+            width: 100%;
+        }
+
+        /* This style is for the option the student CHOSE */
+        .wrong-answer {
+            background-color: #f8d7da; /* Light red */
+            border-color: #f5c2c7;
+        }
+        .wrong-answer .form-check-label::after {
+            content: ' (Your Answer)';
+            color: #721c24;
+            font-weight: bold;
+            float: right;
+        }
+
+        /* This style is for the CORRECT option */
+        .correct-answer {
+            background-color: #d1e7dd; /* Light green */
+            border-color: #badbcc;
+        }
+        .correct-answer .form-check-label::after {
+            content: ' (Correct Answer)';
+            color: #0f5132;
+            font-weight: bold;
+            float: right;
+        }
+
+        /* This handles the case where the student CHOSE the correct answer */
+        .correct-answer.wrong-answer .form-check-label::after {
+             content: ' (Correct & Your Answer)';
+        }
+
+        .unanswered {
+            font-style: italic;
+            color: #6c757d;
+            padding: 0.75rem 1.25rem;
+        }
+    </style>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container my-5">
+
+  <!-- --- NEW: DECORATED HEADER --- -->
+  <div class="review-header">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="mb-1" th:text="${exam.title}">Exam Title</h1>
+        <p class="text-muted fs-5 mb-0">Reviewing your results</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="text-muted">Your Score</div>
+        <div class="display-4 fw-bold"
+             th:classappend="${((result.scoreAchieved * 100.0) / result.totalMarks) >= 70 ? 'text-success' : 'text-danger'}"
+             th:text="${result.scoreAchieved} + ' / ' + ${result.totalMarks}">
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- --- END OF HEADER --- -->
+
+
+  <!-- Loop through questions -->
+  <div th:each="question, iter : ${questions}" class="card question-card">
+    <div class="card-header">
+      <h5 th:text="|Question ${iter.count} (Marks: ${question.marks})|">Question</h5>
+    </div>
+    <div class="card-body">
+      <p class="card-text fs-5" th:text="${question.text}">Question text goes here...</p>
+
+      <!-- Get student's answer for this question from the Map -->
+      <th:block th:with="studentOpt=${studentAnswers.get(question.id)}">
+
+
+        <!-- Display Option 1 -->
+        <div class="review-option"
+             th:classappend="${question.correctAnswer == 1 ? 'correct-answer' : ''} + ${studentOpt == 1 ? ' wrong-answer' : ''}">
+          <input class="form-check-input" type="radio" disabled th:checked="${studentOpt == 1}">
+          <label class="form-check-label" th:text="${question.option1}">Option 1</label>
+        </div>
+
+        <!-- Display Option 2 -->
+        <div class="review-option"
+             th:classappend="${question.correctAnswer == 2 ? 'correct-answer' : ''} + ${studentOpt == 2 ? ' wrong-answer' : ''}">
+          <input class="form-check-input" type="radio" disabled th:checked="${studentOpt == 2}">
+          <label class="form-check-label" th:text="${question.option2}">Option 2</label>
+        </div>
+
+        <!-- Display Option 3 -->
+        <div class="review-option"
+             th:classappend="${question.correctAnswer == 3 ? 'correct-answer' : ''} + ${studentOpt == 3 ? ' wrong-answer' : ''}">
+          <input class="form-check-input" type="radio" disabled th:checked="${studentOpt == 3}">
+          <label class="form-check-label" th:text="${question.option3}">Option 3</label>
+        </div>
+
+        <!-- Display Option 4 -->
+        <div class="review-option"
+             th:classappend="${question.correctAnswer == 4 ? 'correct-answer' : ''} + ${studentOpt == 4 ? ' wrong-answer' : ''}">
+          <input class="form-check-input" type="radio" disabled th:checked="${studentOpt == 4}">
+          <label class="form-check-label" th:text="${question.option4}">Option 4</label>
+        </div>
+
+        <!-- Unanswered -->
+        <div th:if="${studentOpt == 0 or studentOpt == null}" class="p-3 mt-3 unanswered">
+          <i class="bi bi-exclamation-circle me-2"></i>You did not answer this question.
+        </div>
+
+      </th:block>
+    </div>
+  </div>
+
+  <div class="text-center my-5">
+    <a th:href="@{/student/my-results}" class="btn btn-primary btn-lg">
+      <i class="bi bi-arrow-left-circle me-2"></i>Back to Results
+    </a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Student Account</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h2 class="text-center">Create Student Account</h2>
+                </div>
+
+                <div class="card-body">
+
+                    <div th:if="${param.success}"
+                         class="alert alert-success">
+                        Registration successful!
+                        <a th:href="@{/login}">Log in here</a>.
+                    </div>
+
+                    <div th:if="${registrationError}"
+                         class="alert alert-danger"
+                         th:text="${registrationError}">
+                    </div>
+
+                    <div th:if="${fileError}"
+                         class="alert alert-danger"
+                         th:text="${fileError}">
+                    </div>
+
+                    <form th:action="@{/register}"
+                          th:object="${user}"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">
+                                Full Name
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="fullName"
+                                   th:field="*{fullName}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                Email (your login username)
+                            </label>
+                            <input type="email"
+                                   class="form-control"
+                                   id="username"
+                                   th:field="*{username}"
+                                   required>
+                            <p class="text-danger"
+                               th:if="${#fields.hasErrors('username')}"
+                               th:errors="*{username}">
+                            </p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="mobileNumber" class="form-label">
+                                Mobile Number
+                            </label>
+                            <input type="tel"
+                                   class="form-control"
+                                   id="mobileNumber"
+                                   th:field="*{mobileNumber}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="profilePicFile" class="form-label">
+                                Profile Picture (optional)
+                            </label>
+                            <input type="file"
+                                   class="form-control"
+                                   id="profilePicFile"
+                                   name="profilePicFile"
+                                   accept="image/png,image/jpeg">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                Password
+                            </label>
+                            <input type="password"
+                                   class="form-control"
+                                   id="password"
+                                   th:field="*{password}"
+                                   minlength="6"
+                                   required>
+                            <p class="text-danger"
+                               th:if="${#fields.hasErrors('password')}"
+                               th:errors="*{password}">
+                            </p>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-success w-100">
+                            Register
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p>
+                            Already have an account?
+                            <a th:href="@{/login}">Login here</a>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

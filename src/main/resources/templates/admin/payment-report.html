@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Payment Report</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: white;
+            background: #374151;
+            padding: 10px 18px;
+            border-radius: 6px;
+        }
+
+        .back-btn:hover {
+            background: #4b5563;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.06);
+
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #f3f4f6;
+            text-align: left;
+            padding: 13px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 13px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .created {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .expired {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            color: #6b7280;
+        }
+
+        .amount {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .id {
+            font-family: monospace;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+
+<div class="header">
+
+    <h1>Payment Report</h1>
+
+    <a href="/admin/dashboard"
+       class="back-btn">
+        ← Admin Dashboard
+    </a>
+
+</div>
+
+
+<div class="container">
+
+
+    <!-- ========================================================
+         SUMMARY
+         ======================================================== -->
+
+    <div class="summary">
+
+        <div class="card">
+
+            <div class="card-title">
+                Total Transactions
+            </div>
+
+            <div class="card-value"
+                 th:text="${#lists.size(enrollments)}">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Successful Payments
+            </div>
+
+            <div class="card-value"
+                 th:text="${#lists.size(enrollments.?[status == 'PAID'])}">
+                0
+            </div>
+
+        </div>
+
+
+        package com.example.exam.controller;
+
+import com.example.exam.model.CourseEnrollment;
+import com.example.exam.repository.CourseEnrollmentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Controller
+@RequestMapping("/admin/payments")
+public class AdminPaymentController {
+
+    @Autowired
+    private CourseEnrollmentRepository enrollmentRepository;
+
+
+    @GetMapping
+    public String paymentReport(Model model) {
+
+        List<CourseEnrollment> enrollments =
+                enrollmentRepository
+                        .findAllByOrderByPurchasedAtDesc();
+
+
+        // --------------------------------------------------------
+        // Count successful payments
+        // --------------------------------------------------------
+
+        long successfulPayments =
+                enrollments.stream()
+                        .filter(e ->
+                                "PAID".equalsIgnoreCase(
+                                        e.getStatus()))
+                        .count();
+
+
+        // --------------------------------------------------------
+        // Calculate total revenue
+        // --------------------------------------------------------
+
+        BigDecimal totalRevenue =
+                enrollments.stream()
+                        .filter(e ->
+                                "PAID".equalsIgnoreCase(
+                                        e.getStatus()))
+                        .map(CourseEnrollment::getAmount)
+                        .filter(amount -> amount != null)
+                        .reduce(
+                                BigDecimal.ZERO,
+                                BigDecimal::add
+                        );
+
+
+        model.addAttribute(
+                "enrollments",
+                enrollments
+        );
+
+        model.addAttribute(
+                "successfulPayments",
+                successfulPayments
+        );
+
+        model.addAttribute(
+                "totalRevenue",
+                totalRevenue
+        );
+
+
+        return "admin/payment-report";
+    }
+}
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================
+         PAYMENT TABLE
+         ======================================================== -->
+
+    <div class="table-container">
+
+
+        <!-- No payments -->
+
+        <div class="empty"
+             th:if="${#lists.isEmpty(enrollments)}">
+
+            <h3>No payment records found</h3>
+
+            <p>
+                Successful course purchases will appear here.
+            </p>
+
+        </div>
+
+
+        <!-- Payment records -->
+
+        <table th:if="${not #lists.isEmpty(enrollments)}">
+
+            <thead>
+
+            <tr>
+
+                <th>#</th>
+
+                <th>Student</th>
+
+                <th>Email</th>
+
+                <th>Mobile</th>
+
+                <th>Subject</th>
+
+                <th>Amount</th>
+
+                <th>Order ID</th>
+
+                <th>Payment ID</th>
+
+                <th>Status</th>
+
+                <th>Purchased At</th>
+
+                <th>Expiry Date</th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            <tr th:each="enrollment, stat : ${enrollments}">
+
+                <!-- Number -->
+
+                <td th:text="${stat.count}">
+                    1
+                </td>
+
+
+                <!-- Student -->
+
+                <td>
+
+                    <strong
+                        th:text="${enrollment.student.fullName != null
+                            ? enrollment.student.fullName
+                            : enrollment.student.username}">
+                        Student
+                    </strong>
+
+                </td>
+
+
+                <!-- Email -->
+
+                <td th:text="${enrollment.student.username}">
+                    student@example.com
+                </td>
+
+
+                <!-- Mobile -->
+
+                <td th:text="${enrollment.student.mobileNumber}">
+                    -
+                </td>
+
+
+                <!-- Subject -->
+
+                <td>
+
+                    <strong
+                        th:text="${enrollment.subject.name}">
+                        Subject
+                    </strong>
+
+                </td>
+
+
+                <!-- Amount -->
+
+                <td class="amount">
+
+                    ₹<span
+                        th:text="${enrollment.amount}">
+                        0
+                    </span>
+
+                </td>
+
+
+                <!-- Razorpay Order ID -->
+
+                <td class="id"
+                    th:text="${enrollment.razorpayOrderId}">
+                    -
+                </td>
+
+
+                <!-- Razorpay Payment ID -->
+
+                <td class="id"
+                    th:text="${enrollment.razorpayPaymentId}">
+                    -
+                </td>
+
+
+                <!-- Status -->
+
+                <td>
+
+                    <span class="status"
+                          th:text="${enrollment.status}"
+                          th:classappend="${enrollment.status == 'PAID'
+                              ? ' paid'
+                              : enrollment.status == 'FAILED'
+                              ? ' failed'
+                              : enrollment.status == 'EXPIRED'
+                              ? ' expired'
+                              : ' created'}">
+                        PAID
+                    </span>
+
+                </td>
+
+
+                <!-- Purchased -->
+
+                <td
+                    th:text="${enrollment.purchasedAt != null
+                        ? #temporals.format(
+                            enrollment.purchasedAt,
+                            'dd-MM-yyyy HH:mm'
+                          )
+                        : '-'}">
+                    -
+                </td>
+
+
+                <!-- Expiry -->
+
+                <td
+                    th:text="${enrollment.expiryDate != null
+                        ? #temporals.format(
+                            enrollment.expiryDate,
+                            'dd-MM-yyyy HH:mm'
+                          )
+                        : 'Lifetime'}">
+                    Lifetime
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

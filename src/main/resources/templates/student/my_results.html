@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Import Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+        }
+        .result-card {
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef;
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .score-percent {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+        .score-raw {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+    </style>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+
+    <!-- Page Header -->
+    <div class="pb-3 mb-4 border-bottom d-flex align-items-center">
+        <i class="bi bi-card-checklist me-3" style="font-size: 2.5rem; color: #0d6efd;"></i>
+        <div>
+            <h2 class="mb-0">My Exam History</h2>
+            <p class="text-muted mb-0">Review your scores and past attempts here.</p>
+        </div>
+    </div>
+
+    <!-- Container for the results -->
+    <div class="row g-4">
+
+        <!-- Message if no results are found -->
+        <th:block th:if="${#lists.isEmpty(pastResults)}">
+            <div class="col-12">
+                <div class="card shadow-sm text-center p-5">
+                    <div class="card-body">
+                        <i class="bi bi-emoji-frown" style="font-size: 3rem; color: #6c757d;"></i>
+                        <h3 class="mt-3">No Results Found</h3>
+                        <p class="text-muted">You have not completed any exams yet.</p>
+                        <a th:href="@{/student/dashboard}" class="btn btn-primary mt-2">
+                            <i class="bi bi-pencil-square me-2"></i>Find an Exam to Take
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+
+        <!-- Loop over each result and create a card -->
+        <div class="col-md-6 col-lg-4" th:each="result : ${pastResults}">
+            <div class="card shadow-sm h-100 result-card">
+                <div class="card-body d-flex flex-column">
+
+                    <!-- Exam Title -->
+                    <h5 class="card-title mb-1" th:text="${result.exam.title}">Java Basics</h5>
+
+                    <!-- Date Taken -->
+                    <small class="text-muted mb-3">
+                        <i class="bi bi-calendar-check me-1"></i>
+                        Taken on <span th:text="${#temporals.format(result.submissionTime, 'MMM dd, yyyy')}"></span>
+                    </small>
+
+                    <!-- Score and Percentage -->
+                    <div class="text-center my-3 p-3 bg-light rounded">
+                        <div th:if="${result.totalMarks > 0}">
+                            <!-- Calculate Percentage -->
+                            <th:block th:with="percentage=${(result.scoreAchieved * 100.0) / result.totalMarks}">
+                                <!-- Color-coded Percentage -->
+                                <div class="score-percent"
+                                     th:classappend="${percentage >= 70 ? 'text-success' : 'text-danger'}"
+                                     th:text="${#numbers.formatDecimal(percentage, 1, 1) + '%'}">
+                                </div>
+                                <!-- Raw Score -->
+                                <div class="score-raw"
+                                     th:text="|Score: ${result.scoreAchieved} / ${result.totalMarks}|">
+                                </div>
+                            </th:block>
+                        </div>
+                        <div th:if="${result.totalMarks == 0}">
+                            <span class="score-percent text-muted">N/A</span>
+                        </div>
+                    </div>
+
+                    <!-- Spacer to push button to bottom -->
+                    <div class="flex-grow-1"></div>
+
+                    <!-- Review Button -->
+                    <a th:href="@{/student/review/{id}(id=${result.id})}" class="btn btn-info w-100">
+                        <i class="bi bi-search me-2"></i>Review Answers
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
