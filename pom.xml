@@ -56,12 +56,13 @@
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
 
-        <!-- PostgreSQL Database Driver -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+        <!-- PostgreSQL Database Driver - Updated for Neon SCRAM authentication -->
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <version>42.7.14</version>
+    <scope>runtime</scope>
+</dependency>
 
         <!-- Lombok -->
         <dependency>
